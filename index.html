@@ -1,75 +1,238 @@
-import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Beer, Clock, DollarSign } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="pt-br">
 
-const BeerSalesTracker = () => {
-  const [lastSale] = useState({
-    time: new Date().toLocaleTimeString(),
-    pricePerLiter: 15.90,
-    liters: 18.3,
-    total: 186.00
-  });
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Vendas - Layout Moderno</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        .progress-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            position: relative;
+            text-align: center;
+            line-height: 120px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+        }
 
-  return (
-    <div className="max-w-md mx-auto p-4 space-y-4">
-      {/* Header */}
-      <Card className="bg-white">
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <Clock className="w-6 h-6 text-pink-500" />
-            <CardTitle className="text-gray-600">Últimas Vendas:</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <h2 className="text-2xl font-bold text-green-600 mb-4">
-            Chopp Unitário às {lastSale.time}
-          </h2>
-          
-          {/* Price per liter */}
-          <div className="bg-gray-100 p-4 rounded-lg mb-4">
-            <p className="text-gray-600 text-lg">
-              Valor por litro: R$ {lastSale.pricePerLiter.toFixed(2)}
-            </p>
-          </div>
-          
-          {/* Total amount */}
-          <div className="bg-red-500 p-4 rounded-lg text-center mb-4">
-            <p className="text-white text-2xl font-bold">
-              Total R$ {lastSale.total.toFixed(2)}
-            </p>
-          </div>
-          
-          {/* Liters */}
-          <div className="bg-green-600 p-4 rounded-lg text-center mb-4">
-            <p className="text-white text-2xl font-bold">
-              Litros {lastSale.liters}
-            </p>
-          </div>
-          
-          {/* Beer options */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col items-center">
-              <div className="bg-amber-400 p-4 rounded-full">
-                <Beer className="w-8 h-8 text-white" />
-              </div>
-              <p className="mt-2 text-gray-600">Chopp Unitário</p>
+        .progress-circle span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .alert-autoclose {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Vendas de Chopp</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-home"></i> Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-chart-line"></i> Relatório</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-cog"></i> Configurações</a>
+                    </li>
+                </ul>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="bg-red-500 p-4 rounded-full">
-                <DollarSign className="w-8 h-8 text-white" />
-              </div>
-              <p className="mt-2 text-gray-600">Chopp Promoção</p>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <div class="row mb-4">
+            <!-- Total de Vendas -->
+            <div class="col-md-6">
+                <div class="card d-flex flex-column align-items-center">
+                    <div id="progressCircleVendas" class="progress-circle">
+                        <span id="totalVendas">0.00</span>
+                    </div>
+                    <h5 class="chart-title mt-3">Total de Vendas</h5>
+                </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Footer */}
-      <p className="text-center text-gray-500 text-sm">
-        Controle de Vendas de Chopp © 2024
-      </p>
+
+            <!-- Litros Restantes -->
+            <div class="col-md-6">
+                <div class="card d-flex flex-column align-items-center">
+                    <div id="progressCircleLitros" class="progress-circle">
+                        <span id="litrosRestantes">50L</span>
+                    </div>
+                    <h5 class="chart-title mt-3">Litros Restantes no Barril</h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de Venda -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="sales-card sales-unit text-center" data-tipo="unidade" data-valor="5.00">
+                    <i class="fas fa-beer fa-2x mb-3"></i>
+                    <h5>Venda de Unidade</h5>
+                    <p>R$ 5,00</p>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="sales-card sales-promo text-center" data-tipo="promocao" data-valor="12.00">
+                    <i class="fas fa-beer fa-2x mb-3"></i>
+                    <h5>Promoção</h5>
+                    <p>R$ 12,00</p>
+                </div>
+            </div>
+        </div>
     </div>
-  );
-};
 
-export default BeerSalesTracker;
+    <!-- Modal de Confirmação -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmModalLabel">Confirmação de Venda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Você tem certeza de que deseja registrar esta venda?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmSale">Confirmar Venda</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert de Sucesso -->
+    <div class="alert alert-success alert-autoclose" role="alert" id="successAlert">
+        Venda cadastrada com sucesso!
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let selectedSale = {};
+
+            // Função para atualizar valores sem recarregar a página
+            function atualizarDashboard() {
+                $.ajax({
+                    url: 'getDashboardData.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            // Atualizar o total de vendas
+                            const totalVendas = parseFloat(response.valorTotalVendas);
+                            $('#totalVendas').text(`${totalVendas.toFixed(2)}`);
+
+                            // Configurar a cor do círculo de total de vendas com base nos valores
+                            const progressCircleVendas = document.getElementById('progressCircleVendas');
+                            if (totalVendas < 280) {
+                                progressCircleVendas.style.backgroundColor = '#dc3545'; // Vermelho (Bootstrap danger)
+                            } else if (totalVendas >= 280 && totalVendas < 500) {
+                                progressCircleVendas.style.backgroundColor = '#ffc107'; // Laranja (Bootstrap warning)
+                            } else {
+                                progressCircleVendas.style.backgroundColor = '#28a745'; // Verde (Bootstrap success)
+                            }
+
+                            // Atualizar os litros restantes
+                            const litrosRestantes = parseFloat(response.litrosRestantes);
+                            $('#litrosRestantes').text(`${litrosRestantes.toFixed(2)}L`);
+
+                            // Configurar a cor do círculo de litros restantes
+                            const progressCircleLitros = document.getElementById('progressCircleLitros');
+                            if (litrosRestantes > 30) {
+                                progressCircleLitros.style.backgroundColor = '#28a745'; // Verde (Bootstrap success)
+                            } else if (litrosRestantes > 15) {
+                                progressCircleLitros.style.backgroundColor = '#ffc107'; // Laranja (Bootstrap warning)
+                            } else {
+                                progressCircleLitros.style.backgroundColor = '#dc3545'; // Vermelho (Bootstrap danger)
+                            }
+                        } else {
+                            alert('Erro: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Erro ao conectar ao servidor: ' + error);
+                    }
+                });
+            }
+
+            // Carregar os dados iniciais do dashboard
+            atualizarDashboard();
+
+            // Clique em um dos botões de venda
+            $('.sales-card').on('click', function () {
+                // Obter o tipo e o valor da venda com base no cartão clicado
+                selectedSale.tipo = $(this).data('tipo');
+                selectedSale.valor = $(this).data('valor');
+
+                // Exibir o modal de confirmação
+                $('#confirmModal').modal('show');
+            });
+
+            // Confirmar a venda após a confirmação no modal
+            $('#confirmSale').on('click', function () {
+                $.ajax({
+                    url: 'registerSale.php',
+                    type: 'POST',
+                    data: {
+                        tipo: selectedSale.tipo,
+                        valor: selectedSale.valor
+                    },
+                    dataType: 'json',
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            // Mostrar o alert de sucesso
+                            $('#successAlert').fadeIn();
+
+                            // Fechar o alert após 2 segundos
+                            setTimeout(function () {
+                                $('#successAlert').fadeOut();
+                            }, 1000);
+
+                            // Atualizar os valores sem recarregar a página
+                            atualizarDashboard();
+                        } else {
+                            alert('Erro: ' + response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert('Erro ao conectar ao servidor: ' + error);
+                    }
+                });
+
+                // Fechar o modal
+                $('#confirmModal').modal('hide');
+            });
+        });
+    </script>
+</body>
+
+</html>
