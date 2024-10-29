@@ -1,0 +1,174 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Beer, Clock, DollarSign, Save, List } from 'lucide-react';
+
+const BeerSalesTracker = () => {
+  // Estado para as vendas e inputs
+  const [sales, setSales] = useState([]);
+  const [liters, setLiters] = useState('');
+  const [pricePerLiter, setPricePerLiter] = useState('15.90');
+
+  // Carregar vendas do localStorage quando o componente iniciar
+  useEffect(() => {
+    const savedSales = localStorage.getItem('beerSales');
+    if (savedSales) {
+      setSales(JSON.parse(savedSales));
+    }
+  }, []);
+
+  // Salvar vendas no localStorage sempre que houver mudanças
+  useEffect(() => {
+    localStorage.setItem('beerSales', JSON.stringify(sales));
+  }, [sales]);
+
+  // Função para adicionar nova venda
+  const addSale = () => {
+    if (!liters || !pricePerLiter) return;
+
+    const newSale = {
+      id: Date.now(),
+      time: new Date().toLocaleTimeString(),
+      date: new Date().toLocaleDateString(),
+      liters: parseFloat(liters),
+      pricePerLiter: parseFloat(pricePerLiter),
+      total: parseFloat(liters) * parseFloat(pricePerLiter)
+    };
+
+    setSales([newSale, ...sales]);
+    setLiters('');
+  };
+
+  // Calcular total do dia
+  const getTodayTotal = () => {
+    const today = new Date().toLocaleDateString();
+    return sales
+      .filter(sale => sale.date === today)
+      .reduce((sum, sale) => sum + sale.total, 0);
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-4 space-y-4">
+      {/* Formulário de Nova Venda */}
+      <Card className="bg-white">
+        <CardHeader>
+          <CardTitle className="text-xl">Nova Venda</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm text-gray-600">Litros:</label>
+            <Input
+              type="number"
+              step="0.1"
+              value={liters}
+              onChange={(e) => setLiters(e.target.value)}
+              placeholder="Quantidade em litros"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm text-gray-600">Preço por Litro:</label>
+            <Input
+              type="number"
+              step="0.10"
+              value={pricePerLiter}
+              onChange={(e) => setPricePerLiter(e.target.value)}
+              placeholder="Preço por litro"
+            />
+          </div>
+          <Button 
+            className="w-full bg-green-600 hover:bg-green-700"
+            onClick={addSale}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            Registrar Venda
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Última Venda */}
+      {sales.length > 0 && (
+        <Card className="bg-white">
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <Clock className="w-6 h-6 text-pink-500" />
+              <CardTitle className="text-gray-600">Última Venda:</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <h2 className="text-2xl font-bold text-green-600 mb-4">
+              Chopp Unitário às {sales[0].time}
+            </h2>
+            
+            <div className="bg-gray-100 p-4 rounded-lg mb-4">
+              <p className="text-gray-600 text-lg">
+                Valor por litro: R$ {sales[0].pricePerLiter.toFixed(2)}
+              </p>
+            </div>
+            
+            <div className="bg-red-500 p-4 rounded-lg text-center mb-4">
+              <p className="text-white text-2xl font-bold">
+                Total R$ {sales[0].total.toFixed(2)}
+              </p>
+            </div>
+            
+            <div className="bg-green-600 p-4 rounded-lg text-center mb-4">
+              <p className="text-white text-2xl font-bold">
+                Litros {sales[0].liters}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Resumo do Dia */}
+      <Card className="bg-white">
+        <CardHeader>
+          <CardTitle className="text-xl">Resumo do Dia</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-blue-500 p-4 rounded-lg text-center">
+            <p className="text-white text-2xl font-bold">
+              Total do Dia: R$ {getTodayTotal().toFixed(2)}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Lista de Vendas */}
+      <Card className="bg-white">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <List className="w-6 h-6 text-gray-500" />
+            <CardTitle className="text-xl">Histórico de Vendas</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {sales.map(sale => (
+              <div 
+                key={sale.id} 
+                className="p-3 bg-gray-50 rounded-lg flex justify-between items-center"
+              >
+                <div>
+                  <p className="text-sm text-gray-600">{sale.date} às {sale.time}</p>
+                  <p className="font-medium">{sale.liters}L x R${sale.pricePerLiter.toFixed(2)}</p>
+                </div>
+                <p className="font-bold text-green-600">
+                  R$ {sale.total.toFixed(2)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Footer */}
+      <p className="text-center text-gray-500 text-sm">
+        Controle de Vendas de Chopp © 2024
+      </p>
+    </div>
+  );
+};
+
+export default BeerSalesTracker;
